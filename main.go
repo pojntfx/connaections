@@ -23,7 +23,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	pr := packetutils.PacketReader{Dev: *rdev}
+	pr := packetutils.PacketReader{
+		Dev:            *rdev,
+		ConnectionChan: make(chan packetutils.Connection),
+	}
 	if err := pr.Open(); err != nil {
 		log.Fatal(err)
 	}
