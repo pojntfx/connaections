@@ -33,7 +33,7 @@ func (pr *PacketReader) Open() error {
 		return err
 	}
 
-	if err := handle.SetBPFFilter("tcp and port 80"); err != nil {
+	if err := handle.SetBPFFilter("tcp or udp"); err != nil {
 		return err
 	}
 
@@ -41,7 +41,10 @@ func (pr *PacketReader) Open() error {
 
 	pr.decodedLayers = make([]gopacket.LayerType, 0, 10)
 
-	pr.parser = gopacket.NewDecodingLayerParser(layers.LayerTypeEthernet, &pr.ipv4, &pr.ipv6, &pr.tcp, &pr.udp)
+	var eth layers.Ethernet
+
+	pr.parser = gopacket.NewDecodingLayerParser(layers.LayerTypeEthernet, &eth, &pr.ipv4, &pr.ipv6, &pr.tcp, &pr.udp)
+	pr.parser.IgnoreUnsupported = true
 
 	return nil
 }
