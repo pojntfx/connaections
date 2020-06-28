@@ -1,6 +1,8 @@
 package services
 
 import (
+	"net"
+
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pojntfx/connaections/pkg/connectionutils"
 	proto "github.com/pojntfx/connaections/pkg/proto/generated"
@@ -12,7 +14,8 @@ import (
 type Connections struct {
 	proto.UnimplementedConnectionsServer
 
-	Messenger *messenger.Messenger
+	Messenger     *messenger.Messenger
+	CountryLookup connectionutils.CountryLookup
 }
 
 func (c *Connections) Subscribe(req *empty.Empty, srv proto.Connections_SubscribeServer) error {
@@ -22,11 +25,16 @@ func (c *Connections) Subscribe(req *empty.Empty, srv proto.Connections_Subscrib
 	}
 
 	for connection := range client {
+		srcIP := connection.(connectionutils.Connection).SrcIP
+		dstIP := connection.(connectionutils.Connection).DstIP
+
 		srv.Send(&proto.Connection{
-			SrcIP:   connection.(connectionutils.Connection).SrcIP,
-			SrcPort: connection.(connectionutils.Connection).SrcPort,
-			DstIP:   connection.(connectionutils.Connection).DstIP,
-			DstPort: connection.(connectionutils.Connection).DstPort,
+			SrcIP:      srcIP,
+			SrcPort:    connection.(connectionutils.Connection).SrcPort,
+			SrcCountry: c.CountryLookup.GetCountryForIP(net.ParseIP(srcIP)),
+			DstIP:      dstIP,
+			DstPort:    connection.(connectionutils.Connection).DstPort,
+			DstCountry: c.CountryLookup.GetCountryForIP(net.ParseIP(dstIP)),
 		})
 	}
 

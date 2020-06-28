@@ -32,8 +32,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	cl := connectionutils.CountryLookup{}
+
 	cs := services.Connections{
-		Messenger: cmsgr,
+		Messenger:     cmsgr,
+		CountryLookup: cl,
 	}
 
 	lis, err := net.Listen("tcp", *laddr)
