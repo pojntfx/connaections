@@ -2,20 +2,32 @@ package services
 
 import (
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/pojntfx/connaections/pkg/packetutils"
+	"github.com/pojntfx/connaections/pkg/connectionutils"
 	proto "github.com/pojntfx/connaections/pkg/proto/generated"
+	"github.com/ugjka/messenger"
 )
 
 //go:generate sh -c "mkdir -p ../proto/generated && protoc --go_out=paths=source_relative,plugins=grpc:../proto/generated -I=../proto ../proto/*.proto"
 
 type Connections struct {
 	proto.UnimplementedConnectionsServer
-	PacketReader *packetutils.PacketReader
+
+	Messenger *messenger.Messenger
 }
 
 func (c *Connections) Subscribe(req *empty.Empty, srv proto.Connections_SubscribeServer) error {
-	for connection := range c.PacketReader.ConnectionChan {
-		srv.Send(&proto.Connection{SrcIP: connection.SrcIP, SrcPort: connection.SrcPort, DstIP: connection.DstIP, DstPort: connection.DstPort})
+	client, err := c.Messenger.Sub()
+	if err != nil {
+		return err
+	}
+
+	for connection := range client {
+		srv.Send(&proto.Connection{
+			SrcIP:   connection.(connectionutils.Connection).SrcIP,
+			SrcPort: connection.(connectionutils.Connection).SrcPort,
+			DstIP:   connection.(connectionutils.Connection).DstIP,
+			DstPort: connection.(connectionutils.Connection).DstPort,
+		})
 	}
 
 	return nil
