@@ -5,8 +5,8 @@ import (
 	"log"
 	"net"
 
+	"github.com/pojntfx/connaections/pkg/packetutils"
 	proto "github.com/pojntfx/connaections/pkg/proto/generated"
-	"github.com/pojntfx/connaections/pkg/proto/netutils"
 	"github.com/pojntfx/connaections/pkg/services"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -14,7 +14,7 @@ import (
 
 func main() {
 	laddr := flag.String("laddr", ":2004", "Listen address")
-	rdev := flag.String("rdev", "en0", "Interface to read packets from")
+	rdev := flag.String("rdev", "eth0", "Interface to read packets from")
 
 	flag.Parse()
 
@@ -23,7 +23,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	pr := netutils.PacketReader{Dev: *rdev}
+	pr := packetutils.PacketReader{Dev: *rdev}
+	if err := pr.Open(); err != nil {
+		log.Fatal(err)
+	}
+
+	go func() {
+		if err := pr.Read(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	srv := grpc.NewServer()
 	reflection.Register(srv)
