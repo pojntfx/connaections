@@ -13,6 +13,8 @@ service Connections {
 message Connection {
   string srcIP = 1;
   string srcPort = 2;
-  string dstIP = 3;
-  string dstPort = 4;
+  string srcCountry = 3;
+  string dstIP = 4;
+  string dstPort = 5;
+  string dstCountry = 6;
 }
