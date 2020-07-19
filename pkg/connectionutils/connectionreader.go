@@ -61,10 +61,10 @@ func (cr *ConnectionReader) Read() error {
 			switch layerType {
 			case layers.LayerTypeIPv4:
 				connection.SrcIP = cr.ipv4.SrcIP.String()
-				connection.DstIP = cr.ipv4.SrcIP.String()
+				connection.DstIP = cr.ipv4.DstIP.String()
 			case layers.LayerTypeIPv6:
 				connection.SrcIP = cr.ipv6.SrcIP.String()
-				connection.DstIP = cr.ipv6.SrcIP.String()
+				connection.DstIP = cr.ipv6.DstIP.String()
 
 			case layers.LayerTypeTCP:
 				connection.SrcPort = cr.tcp.SrcPort.String()
