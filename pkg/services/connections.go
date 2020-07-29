@@ -36,18 +36,22 @@ func (c *Connections) Subscribe(req *empty.Empty, srv proto.Connections_Subscrib
 		}
 
 		srv.Send(&proto.Connection{
-			SrcIP:          srcIP.String(),
-			SrcPort:        connection.(readers.Connection).SrcPort,
-			SrcLatitude:    srcLocation.Latitude,
-			SrcLongitude:   srcLocation.Longitude,
-			SrcCityName:    srcLocation.CityName,
-			SrcCountryCode: srcLocation.CountryCode,
-			DstIP:          dstIP.String(),
-			DstPort:        connection.(readers.Connection).DstPort,
-			DstLatitude:    dstLocation.Latitude,
-			DstLongitude:   dstLocation.Longitude,
-			DstCityName:    dstLocation.CityName,
-			DstCountryCode: dstLocation.CountryCode,
+			Source: &proto.Edge{
+				Ip:          srcIP.String(),
+				Port:        connection.(readers.Connection).SrcPort,
+				Latitude:    srcLocation.Latitude,
+				Longitude:   srcLocation.Longitude,
+				CityName:    srcLocation.CityName,
+				CountryCode: srcLocation.CountryCode,
+			},
+			Dst: &proto.Edge{
+				Ip:          dstIP.String(),
+				Port:        connection.(readers.Connection).DstPort,
+				Latitude:    dstLocation.Latitude,
+				Longitude:   dstLocation.Longitude,
+				CityName:    dstLocation.CityName,
+				CountryCode: dstLocation.CountryCode,
+			},
 		})
 	}
 

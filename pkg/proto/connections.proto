@@ -11,19 +11,15 @@ service Connections {
 }
 
 message Connection {
-  // Source
-  string srcIP = 1;
-  string srcPort = 2;
-  double srcLatitude = 3;
-  double srcLongitude = 4;
-  string srcCityName = 5;
-  string srcCountryCode = 6;
+  Edge source = 1;
+  Edge dst = 2;
+}
 
-  // Destination
-  string dstIP = 7;
-  string dstPort = 8;
-  double dstLatitude = 9;
-  double dstLongitude = 10;
-  string dstCityName = 11;
-  string dstCountryCode = 12;
+message Edge {
+  string ip = 1;
+  string port = 2;
+  double latitude = 3;
+  double longitude = 4;
+  string cityName = 5;
+  string countryCode = 6;
 }
