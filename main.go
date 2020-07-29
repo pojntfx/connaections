@@ -6,8 +6,8 @@ import (
 	"net"
 	"sync"
 
-	"github.com/pojntfx/connaections/pkg/connectionutils"
 	proto "github.com/pojntfx/connaections/pkg/proto/generated"
+	"github.com/pojntfx/connaections/pkg/readers"
 	"github.com/pojntfx/connaections/pkg/services"
 	"github.com/ugjka/messenger"
 	"google.golang.org/grpc"
@@ -17,13 +17,14 @@ import (
 func main() {
 	laddr := flag.String("laddr", ":2004", "Listen address")
 	rdev := flag.String("rdev", "eth0", "Interface to read packets from")
+	dbpath := flag.String("dbpath", "GeoLite2-City.mmdb", "Path to the GeoLite2 database")
 
 	flag.Parse()
 
 	cmsgr := messenger.New(0, false)
-	cchan := make(chan connectionutils.Connection)
+	cchan := make(chan readers.Connection)
 
-	cr := connectionutils.ConnectionReader{
+	cr := readers.ConnectionReader{
 		Dev:            *rdev,
 		ConnectionChan: cchan,
 	}
@@ -32,11 +33,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	cl := connectionutils.CountryLookup{}
+	lr := readers.LocationReader{
+		DbPath: *dbpath,
+	}
+
+	if err := lr.Open(); err != nil {
+		log.Fatal(err)
+	}
 
 	cs := services.Connections{
-		Messenger:     cmsgr,
-		CountryLookup: cl,
+		Messenger:      cmsgr,
+		LocationReader: lr,
 	}
 
 	lis, err := net.Listen("tcp", *laddr)

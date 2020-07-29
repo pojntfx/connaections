@@ -11,10 +11,19 @@ service Connections {
 }
 
 message Connection {
+  // Source
   string srcIP = 1;
   string srcPort = 2;
-  string srcCountry = 3;
-  string dstIP = 4;
-  string dstPort = 5;
-  string dstCountry = 6;
+  double srcLatitude = 3;
+  double srcLongitude = 4;
+  string srcCityName = 5;
+  string srcCountryCode = 6;
+
+  // Destination
+  string dstIP = 7;
+  string dstPort = 8;
+  double dstLatitude = 9;
+  double dstLongitude = 10;
+  string dstCityName = 11;
+  string dstCountryCode = 12;
 }
