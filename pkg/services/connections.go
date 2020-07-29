@@ -1,11 +1,9 @@
 package services
 
 import (
-	"net"
-
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/pojntfx/connaections/pkg/connectionutils"
 	proto "github.com/pojntfx/connaections/pkg/proto/generated"
+	"github.com/pojntfx/connaections/pkg/readers"
 	"github.com/ugjka/messenger"
 )
 
@@ -14,8 +12,8 @@ import (
 type Connections struct {
 	proto.UnimplementedConnectionsServer
 
-	Messenger     *messenger.Messenger
-	CountryLookup connectionutils.CountryLookup
+	Messenger      *messenger.Messenger
+	LocationReader readers.LocationReader
 }
 
 func (c *Connections) Subscribe(req *empty.Empty, srv proto.Connections_SubscribeServer) error {
@@ -25,16 +23,31 @@ func (c *Connections) Subscribe(req *empty.Empty, srv proto.Connections_Subscrib
 	}
 
 	for connection := range client {
-		srcIP := connection.(connectionutils.Connection).SrcIP
-		dstIP := connection.(connectionutils.Connection).DstIP
+		srcIP := connection.(readers.Connection).SrcIP
+		dstIP := connection.(readers.Connection).DstIP
+
+		srcLocation, err := c.LocationReader.GetLocationForIP(srcIP)
+		if err != nil {
+			return err
+		}
+		dstLocation, err := c.LocationReader.GetLocationForIP(dstIP)
+		if err != nil {
+			return err
+		}
 
 		srv.Send(&proto.Connection{
-			SrcIP:      srcIP,
-			SrcPort:    connection.(connectionutils.Connection).SrcPort,
-			SrcCountry: c.CountryLookup.GetCountryForIP(net.ParseIP(srcIP)),
-			DstIP:      dstIP,
-			DstPort:    connection.(connectionutils.Connection).DstPort,
-			DstCountry: c.CountryLookup.GetCountryForIP(net.ParseIP(dstIP)),
+			SrcIP:          srcIP.String(),
+			SrcPort:        connection.(readers.Connection).SrcPort,
+			SrcLatitude:    srcLocation.Latitude,
+			SrcLongitude:   srcLocation.Longitude,
+			SrcCityName:    srcLocation.CityName,
+			SrcCountryCode: srcLocation.CountryCode,
+			DstIP:          dstIP.String(),
+			DstPort:        connection.(readers.Connection).DstPort,
+			DstLatitude:    dstLocation.Latitude,
+			DstLongitude:   dstLocation.Longitude,
+			DstCityName:    dstLocation.CityName,
+			DstCountryCode: dstLocation.CountryCode,
 		})
 	}
 

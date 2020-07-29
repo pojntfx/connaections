@@ -1,15 +1,17 @@
-package connectionutils
+package readers
 
 import (
+	"net"
+
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 )
 
 type Connection struct {
-	SrcIP   string
+	SrcIP   net.IP
 	SrcPort string
-	DstIP   string
+	DstIP   net.IP
 	DstPort string
 }
 
@@ -60,11 +62,11 @@ func (cr *ConnectionReader) Read() error {
 		for _, layerType := range cr.decodedLayers {
 			switch layerType {
 			case layers.LayerTypeIPv4:
-				connection.SrcIP = cr.ipv4.SrcIP.String()
-				connection.DstIP = cr.ipv4.DstIP.String()
+				connection.SrcIP = cr.ipv4.SrcIP
+				connection.DstIP = cr.ipv4.DstIP
 			case layers.LayerTypeIPv6:
-				connection.SrcIP = cr.ipv6.SrcIP.String()
-				connection.DstIP = cr.ipv6.DstIP.String()
+				connection.SrcIP = cr.ipv6.SrcIP
+				connection.DstIP = cr.ipv6.DstIP
 
 			case layers.LayerTypeTCP:
 				connection.SrcPort = cr.tcp.SrcPort.String()
